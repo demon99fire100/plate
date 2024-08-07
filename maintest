@@ -16,7 +16,7 @@ coco_model = YOLO('yolov8n.pt')
 license_plate_detector = YOLO('license_plate_detector.pt')
 
 
-cap = cv2.VideoCapture(-1) 
+cap = cv2.VideoCapture(0) 
 
 vehicles = [2, 3, 5, 7] 
 
@@ -36,10 +36,12 @@ while ret:
     
     detections = coco_model(frame)[0]
     detections_ = []
-    for detection in detections.boxes.data.tolist():
+    detection = []
+    while detection in detections.boxes.data.tolist():
         x1, y1, x2, y2, score, class_id = detection
         if int(class_id) in vehicles:
             detections_.append([x1, y1, x2, y2, score])
+        continue
 
    
     track_ids = mot_tracker.update(np.asarray(detections_))
@@ -72,9 +74,8 @@ while ret:
                         'text_score': license_plate_text_score
                     }
                 }
+           
             write_csv(results, './test.csv')
-
-
     
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
@@ -82,4 +83,3 @@ while ret:
 cap.release()
 cv2.destroyAllWindows()
 
-#write_csv(results, './test.csv')
