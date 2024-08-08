@@ -36,15 +36,21 @@ while ret:
     
     detections = coco_model(frame)[0]
     detections_ = []
-    detection = []
-    while detection in detections.boxes.data.tolist():
+    
+    for detection in detections.boxes.data.tolist():
         x1, y1, x2, y2, score, class_id = detection
         if int(class_id) in vehicles:
             detections_.append([x1, y1, x2, y2, score])
-        continue
+        
 
    
-    track_ids = mot_tracker.update(np.asarray(detections_))
+    #track_ids = mot_tracker.update(np.asarray(detections_))
+    if detections_:
+        track_ids = mot_tracker.update(np.asarray(detections_))
+    else:
+    # Handle the case where there are no valid detections
+        track_ids = []
+
 
     license_plates = license_plate_detector(frame)[0]
     for license_plate in license_plates.boxes.data.tolist():
@@ -75,11 +81,10 @@ while ret:
                     }
                 }
            
-            write_csv(results, './test.csv')
+                write_csv(results, './test.csv')
     
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
 cap.release()
 cv2.destroyAllWindows()
-
